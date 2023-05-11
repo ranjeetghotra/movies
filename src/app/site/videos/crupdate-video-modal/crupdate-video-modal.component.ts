@@ -43,7 +43,7 @@ export class CrupdateVideoModalComponent implements OnInit {
         thumbnail: [],
         url: [],
         quality: [null],
-        type: ['video'],
+        type: ['external'],
         category: ['trailer'],
         title: [],
         title_id: [],
@@ -210,5 +210,9 @@ export class CrupdateVideoModalComponent implements OnInit {
 
     public isEmbed(): boolean {
         return this.videoForm.get('type').value === 'embed';
+    }
+
+    public isYtVideoId(): boolean {
+        return this.videoForm.get('type').value === 'youtube';
     }
 }

@@ -71,7 +71,7 @@
         <td>
           <div class="column-with-image">
             <img [src]="video.thumbnail || video.title?.backdrop" alt="" [title]="video.name" />
-            <a class="video-name link" [href]="video.url" target="_blank">{{ video.name }}</a>
+            <a class="video-name link" [href]="(video.type == 'youtube' ? 'https://youtu.be/' : '') + video.url" target="_blank">{{ video.name }}</a>
           </div>
         </td>
         <td data-label="Title" *ngIf="!title">

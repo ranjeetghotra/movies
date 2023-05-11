@@ -44,15 +44,16 @@
       <label for="type" trans>Type</label>
       <select required id="type" formControlName="type">
         <option value="embed" trans>Embed</option>
-        <option value="video" trans>Direct Video (.mp4, .webm, .avi, .mov etc.)</option>
+        <!-- <option value="video" trans>Direct Video (.mp4, .webm, .avi, .mov etc.)</option> -->
         <option value="stream" trans>Adaptive Stream (hls, dash)</option>
         <option value="external" trans>Basic Url</option>
+        <option value="youtube" trans>Youtube (video id)</option>
       </select>
       <p class="error" *ngIf="errors.type">{{ errors.type }}</p>
     </div>
 
     <div class="input-container">
-      <label for="crupdate-video-modal-url">{{ (isEmbed() ? 'Embed Code' : 'Url') | trans }}</label>
+      <label for="crupdate-video-modal-url">{{ (isEmbed() ? 'Embed Code' : (isYtVideoId() ? 'Video ID' : 'Url')) | trans }}</label>
       <div class="action-left" [class.input-with-action]="isDirectVideo()">
         <button
           type="button"
