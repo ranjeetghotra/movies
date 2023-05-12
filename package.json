@@ -4,6 +4,7 @@
     "scripts": {
         "ng": "ng",
         "start": "ng serve --aot --proxy-config proxy.conf.json --host 0.0.0.0",
+        "start2": "ng serve --aot --proxy-config proxy.conf.json  --disable-host-check",
         "build": "ng build --source-map=false --configuration production --common-chunk=false --source-map --deploy-url=client/",
         "test": "ng test",
         "lint": "ng lint",
