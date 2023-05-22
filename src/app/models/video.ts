@@ -6,7 +6,8 @@ export class Video {
     name: string;
     description?: string;
     url: string;
-    type: 'video'|'stream'|'embed'|'external';
+    audio_url?: string;
+    type: 'video'|'stream'|'embed'|'external'|'youtube';
     category: 'full'|'trailer'|'clip'|'featurette'|'teaser';
     thumbnail?: string;
     source: 'local'|'tmdb';

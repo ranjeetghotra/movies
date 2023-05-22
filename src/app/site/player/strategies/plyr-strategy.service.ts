@@ -15,6 +15,7 @@ export class PlyrStrategyService {
     player: any;
     playbackEnded$ = new Subject();
     private video: Video;
+    private audioEl!: HTMLAudioElement;
 
     constructor(
         private lazyLoader: LazyLoaderService,
@@ -30,16 +31,17 @@ export class PlyrStrategyService {
 
     loadSource(
         videoEl: HTMLVideoElement,
+        audioEl: HTMLAudioElement,
         video: Video,
         variantOptions?: PlayerQualityVariantOptions
     ): Promise<void> {
-        return this.initPlayer(videoEl, video, variantOptions).then(() => {
+        return this.initPlayer(videoEl, audioEl, video, variantOptions).then(() => {
             if (!video) return;
 
             if (video.type !== 'stream') {
                 this.player.source = this.buildSource(video);
             }
-
+            this.audioEl.play();
             setTimeout(() => {
                 this.player.once('canplay', () => {
                     if (video.latest_play?.time_watched) {
@@ -47,8 +49,36 @@ export class PlyrStrategyService {
                         this.player.currentTime =
                             video.latest_play.time_watched;
                     }
+                    if(audioEl) {
+                        this.audioEl.currentTime = this.player.currentTime;
+                    }
                 });
             }, 50);
+                        
+            this.player.on('play', () => {
+                this.audioEl.currentTime = this.player.currentTime;
+                this.audioEl.play();
+            });
+            this.player.on('pause', () => {
+                this.audioEl.pause();
+            });
+            this.player.on('playing', () => {
+                this.audioEl.currentTime = this.player.currentTime;
+                this.audioEl.play();
+            });
+            this.player.on('waiting', () => {
+                this.audioEl.pause();
+            });
+            this.player.on('seeked', () => {
+                this.audioEl.currentTime = this.player.currentTime;
+            });
+            this.player.on('ratechange', () => {
+                this.audioEl.playbackRate = this.player.speed;
+            });
+            this.player.on('volumechange', () => {
+                this.audioEl.muted = this.player.muted;
+                this.audioEl.volume = this.player.volume;
+            });
         });
     }
 
@@ -80,6 +110,7 @@ export class PlyrStrategyService {
     supported(video: Video) {
         return (
             video.type === 'video' ||
+            video.type === 'youtube' ||
             video.type === 'stream' ||
             (video.type === 'embed' && this.embedSupportedByPlyr(video.url))
         );
@@ -87,6 +118,7 @@ export class PlyrStrategyService {
 
     private initPlayer(
         videoEl: HTMLVideoElement,
+        audioEl: HTMLAudioElement,
         video: Video,
         variantOptions?: PlayerQualityVariantOptions
     ): Promise<void> {
@@ -109,6 +141,12 @@ export class PlyrStrategyService {
                         onChange: variantOptions.onChange,
                         options: variantOptions.variants.map(qv => qv.quality),
                     };
+                }
+                if(video.audio_url) {
+                    this.audioEl = audioEl
+                    this.audioEl.src = video.audio_url;
+                } else {
+                    this.audioEl = null
                 }
                 this.player = new Plyr(videoEl, plyrOptions);
 

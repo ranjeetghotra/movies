@@ -27,6 +27,7 @@ export class PlayerService {
     public loading$ = new BehaviorSubject<boolean>(false);
     private videoContainer: HTMLElement;
     private videoEl: HTMLVideoElement;
+    private audioEl: HTMLAudioElement;
 
     constructor(
         private settings: Settings,
@@ -73,6 +74,11 @@ export class PlayerService {
             this.videoEl['playsInline'] = true;
             this.videoContainer.appendChild(this.videoEl);
         }
+        if ( ! this.audioEl) {
+            this.audioEl = document.createElement('audio');
+            this.audioEl.style.display = 'none';
+            this.videoContainer.appendChild(this.audioEl);
+        }
     }
 
     private cueVideo() {
@@ -98,7 +104,7 @@ export class PlayerService {
                 this.activeVideo.type === 'stream' ? this.shaka.loadSource(this.videoEl, this.activeVideo) : Promise.resolve(),
             ]).then(() => {
                 this.loading$.next(false);
-                this.plyr.loadSource(this.videoEl, this.activeVideo, this.shaka.variantOptions);
+                this.plyr.loadSource(this.videoEl, this.audioEl, this.activeVideo, this.shaka.variantOptions);
             });
         } else {
             // plyr strategy will log plays already

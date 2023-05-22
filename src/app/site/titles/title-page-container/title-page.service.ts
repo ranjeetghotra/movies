@@ -16,6 +16,7 @@ import {CrupdateVideoModalComponent} from '../../videos/crupdate-video-modal/cru
 import {PlayerOverlayService} from '../../player/player-overlay.service';
 import {CurrentUser} from '@common/auth/current-user';
 import {Router} from '@angular/router';
+import {HttpClient} from '@angular/common/http';
 
 export enum TitlePageTab {
     cast,
@@ -50,6 +51,7 @@ export class TitlePageService {
         private modal: Modal,
         private playerOverlay: PlayerOverlayService,
         private currentUser: CurrentUser,
+        private http: HttpClient,
         private router: Router
     ) {}
 
@@ -82,6 +84,11 @@ export class TitlePageService {
         }
         if (video.type === 'external') {
             window.open(video.url, '_blank');
+        } else if(video.type === 'youtube') {
+            this.http.get(`/secure/fetch-video/${video.url}`).subscribe((res: any) => {
+                const data = {...video, url: res.video, audio_url: res.audio, };
+                this.playerOverlay.open(data, this.activeEpisode || this.title);
+            })
         } else {
             this.playerOverlay.open(video, this.activeEpisode || this.title);
         }
