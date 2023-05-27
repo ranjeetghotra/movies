@@ -4,10 +4,10 @@
         <ng-content></ng-content>
     </div>
     <div class="info-row">
-        <ng-container *ngIf="infoRowTarget === 'signup' && !settings.get('registration.disable')">
+        <!-- <ng-container *ngIf="infoRowTarget === 'signup' && !settings.get('registration.disable')">
             <span trans>Don't have an account?</span>&ngsp;
             <a class="register-link" [routerLink]="['/register']" trans>Sign up.</a>
-        </ng-container>
+        </ng-container> -->
 
         <ng-container *ngIf="infoRowTarget === 'signin'">
             <span trans>Already have an account?</span>&ngsp;

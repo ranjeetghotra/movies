@@ -15,6 +15,15 @@
             </div>
 
             <div class="input-container">
+                <label for="subdomain" trans>Subdomain</label>
+                <input type="text" formControlName="subdomain" id="subdomain" required>
+                <p class="error" *ngIf="errors.subdomain">
+                    <mat-icon svgIcon="warning"></mat-icon>
+                    <span>{{errors.subdomain}}</span>
+                </p>
+            </div>
+
+            <div class="input-container">
                 <label for="register_password" trans>Password</label>
                 <input type="password" formControlName="password" id="register_password" required>
                 <p class="error" *ngIf="errors.password">

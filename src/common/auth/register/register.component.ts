@@ -25,12 +25,14 @@ export class RegisterComponent implements OnInit {
     public registerPolicies: Partial<MenuItem>[] = [];
     public form = this.fb.group({
         email: [''],
+        subdomain: [''],
         password: [''],
         password_confirmation: [''],
         purchase_code: [''],
     });
     public errors$ = new BehaviorSubject<{
         email?: string,
+        subdomain?: string,
         password?: string,
         general?: string,
         purchase_code?: string

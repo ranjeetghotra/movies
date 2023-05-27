@@ -1,21 +1,21 @@
 {
     "/secure": {
-        "target": "http://mtdb.test",
+        "target": "http://video.hr",
         "secure": false,
         "changeOrigin": true
     },
     "/storage": {
-        "target": "http://mtdb.test",
+        "target": "http://video.hr",
         "secure": false,
         "changeOrigin": true
     },
     "/client": {
-        "target": "http://mtdb.test",
+        "target": "http://video.hr",
         "secure": false,
         "changeOrigin": true
     },
     "/__clockwork": {
-        "target": "http://mtdb.test",
+        "target": "http://video.hr",
         "secure": false,
         "changeOrigin": true
     }
