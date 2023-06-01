@@ -30,6 +30,7 @@ export class CrupdateUserModalComponent implements OnInit {
     public loading$ = new BehaviorSubject<boolean>(false);
     public form = this.fb.group({
         email: [''],
+        subdomain: [''],
         password: [''],
         avatar: [''],
         first_name: [''],

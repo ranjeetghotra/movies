@@ -1,22 +1,24 @@
-import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {FormBuilder} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Title} from '../../../models/title';
-import {VideoService} from '../video.service';
-import {finalize} from 'rxjs/operators';
-import {MESSAGES} from '../../../toast-messages';
-import {Video} from '../../../models/video';
-import {UploadQueueService} from '@common/uploads/upload-queue/upload-queue.service';
-import {Toast} from '@common/core/ui/toast.service';
-import {Settings} from '@common/core/config/settings.service';
-import {openUploadWindow} from '@common/uploads/utils/open-upload-window';
-import {UploadInputTypes} from '@common/uploads/upload-input-config';
-import {LanguageListItem, ValueLists} from '@common/core/services/value-lists.service';
-import {Router} from '@angular/router';
-import {scrollInvalidInputIntoView} from '@common/core/utils/scroll-invalid-input-into-view';
-import {BackendErrorResponse} from '@common/core/types/backend-error-response';
-import {UploadApiConfig} from '@common/uploads/types/upload-api-config';
+import { ChangeDetectionStrategy, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { FormBuilder } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Title } from '../../../models/title';
+import { VideoService } from '../video.service';
+import { finalize } from 'rxjs/operators';
+import { MESSAGES } from '../../../toast-messages';
+import { Video } from '../../../models/video';
+import { UploadQueueService } from '@common/uploads/upload-queue/upload-queue.service';
+import { Toast } from '@common/core/ui/toast.service';
+import { Settings } from '@common/core/config/settings.service';
+import { openUploadWindow } from '@common/uploads/utils/open-upload-window';
+import { UploadInputTypes } from '@common/uploads/upload-input-config';
+import { LanguageListItem, ValueLists } from '@common/core/services/value-lists.service';
+import { Router } from '@angular/router';
+import { scrollInvalidInputIntoView } from '@common/core/utils/scroll-invalid-input-into-view';
+import { BackendErrorResponse } from '@common/core/types/backend-error-response';
+import { UploadApiConfig } from '@common/uploads/types/upload-api-config';
+import { HttpClient } from '@angular/common/http';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
 interface AddVideoModalData {
     video?: Video;
@@ -33,11 +35,13 @@ interface AddVideoModalData {
     providers: [UploadQueueService],
 })
 export class CrupdateVideoModalComponent implements OnInit {
+    @ViewChild('myAutocompleteTrigger') private autocompleteTrigger: MatAutocompleteTrigger;
+    // @ViewChild(MatAutocompleteTrigger) autocompleteTrigger: MatAutocompleteTrigger;
     public loading$ = new BehaviorSubject(false);
     public languages$ = new BehaviorSubject<LanguageListItem[]>([]);
     public episodeCount$ = new BehaviorSubject([]);
     public qualities: string[] = [];
-    public errors: {[key: string]: any} = {};
+    public errors: { [key: string]: any } = {};
     public videoForm = this.fb.group({
         name: [],
         thumbnail: [],
@@ -52,6 +56,10 @@ export class CrupdateVideoModalComponent implements OnInit {
         language: ['en'],
         order: [0],
     });
+    ytOptions: { id: string, name: string }[] = [{ id: '', name: 'kar' }];
+    ytInput = '';
+    optionSubscription: any;
+    isOptionsLoading = false;
 
     constructor(
         private fb: FormBuilder,
@@ -62,6 +70,7 @@ export class CrupdateVideoModalComponent implements OnInit {
         public settings: Settings,
         private router: Router,
         private dialogRef: MatDialogRef<CrupdateVideoModalComponent>,
+        private http: HttpClient,
         @Inject(MAT_DIALOG_DATA) public data: AddVideoModalData,
     ) {
         this.qualities = this.settings.getJson('streaming.qualities', []);
@@ -115,10 +124,10 @@ export class CrupdateVideoModalComponent implements OnInit {
         this.dialogRef.close(video);
     }
 
-    public uploadFile(type: 'image'|'video') {
-        openUploadWindow({types: [UploadInputTypes[type]]}).then(uploads => {
+    public uploadFile(type: 'image' | 'video') {
+        openUploadWindow({ types: [UploadInputTypes[type]] }).then(uploads => {
             const htmlVideo = document.createElement('video');
-            if (type === 'video' &&  !htmlVideo.canPlayType(uploads[0].mime)) {
+            if (type === 'video' && !htmlVideo.canPlayType(uploads[0].mime)) {
                 return this.toast.open('This video format is not supported.');
             }
             const params = {
@@ -135,7 +144,7 @@ export class CrupdateVideoModalComponent implements OnInit {
                     [prop]: response.fileEntry.url
                 });
                 if (type === 'video') {
-                    this.videoForm.patchValue({type: 'video'});
+                    this.videoForm.patchValue({ type: 'video' });
                 }
             });
         });
@@ -162,12 +171,12 @@ export class CrupdateVideoModalComponent implements OnInit {
         }
 
         if (this.data.title) {
-            this.videoForm.patchValue({title: this.data.title});
+            this.videoForm.patchValue({ title: this.data.title });
             this.videoForm.get('title').disable();
         }
 
         // hydrate season and episode number, if media item is series
-        if (this.isSeries() && ! this.data.video && ! this.videoForm.value.season_num) {
+        if (this.isSeries() && !this.data.video && !this.videoForm.value.season_num) {
             this.videoForm.patchValue({
                 season_num: this.data.season_num || this.getFirstSeasonNumber(),
                 episode_num: this.data.episode_num || 1
@@ -193,6 +202,52 @@ export class CrupdateVideoModalComponent implements OnInit {
         } else {
             return 1;
         }
+    }
+
+    customFilter = (items) => items
+
+    selectEvent(item): void {
+        this.videoForm.patchValue({ url: item.id })
+    }
+
+    getOptions(val): void {
+        this.isOptionsLoading = true;
+        if (this.optionSubscription) {
+            this.optionSubscription.unsubscribe()
+        }
+        if (val.length) {
+            this.optionSubscription = this.http.get(`/secure/fetch-video`, { params: { query: val } }).subscribe((res: any) => {
+                this.ytOptions = res.map(item => ({ id: item.id, name: item.title }))
+                this.isOptionsLoading = false;
+                // console.log(this.autocompleteTrigger)
+                // this.autocompleteTrigger.closePanel();
+                // setTimeout(() => {
+                //     this.autocompleteTrigger.openPanel();
+                //     this.autocompleteTrigger.updatePosition();
+                // }, 1000);
+                // if (this.autocompleteTrigger && this.autocompleteTrigger.panelOpen) {
+                //     console.log('closing')
+                //     this.autocompleteTrigger.closePanel();
+                //     setTimeout(() => {
+                //       this.autocompleteTrigger.openPanel();
+                //     });
+                //   } else {
+                //     console.log('opening')
+                //     this.autocompleteTrigger.openPanel();
+                //   }
+            })
+        } else {
+            this.ytOptions = []
+            this.isOptionsLoading = false;
+        }
+    }
+
+    onOptionSelected(e) {
+        console.log(e)
+        this.videoForm.patchValue({
+            url: e.option.value,
+        })
+        this.ytInput = ''
     }
 
     public insideAdmin(): boolean {

@@ -20,22 +20,11 @@
     <div class="input-container">
       <label for="thumbnail" trans>Thumbnail</label>
       <div class="input-with-action action-left">
-        <button
-          type="button"
-          mat-flat-button
-          color="accent"
-          (click)="uploadFile('image')"
-          [matTooltip]="'Upload thumbnail' | trans"
-        >
+        <button type="button" mat-flat-button color="accent" (click)="uploadFile('image')"
+          [matTooltip]="'Upload thumbnail' | trans">
           <mat-icon svgIcon="file-upload"></mat-icon>
         </button>
-        <input
-          type="text"
-          formControlName="thumbnail"
-          id="thumbnail"
-          minlength="1"
-          maxlength="250"
-        />
+        <input type="text" formControlName="thumbnail" id="thumbnail" minlength="1" maxlength="250" />
       </div>
       <p class="error" *ngIf="errors.thumbnail">{{ errors.thumbnail }}</p>
     </div>
@@ -53,32 +42,25 @@
     </div>
 
     <div class="input-container">
-      <label for="crupdate-video-modal-url">{{ (isEmbed() ? 'Embed Code' : (isYtVideoId() ? 'Video ID' : 'Url')) | trans }}</label>
+      <label for="crupdate-video-modal-url">{{ (isEmbed() ? 'Embed Code' : (isYtVideoId() ? 'Video ID' : 'Url')) | trans
+        }}</label>
       <div class="action-left" [class.input-with-action]="isDirectVideo()">
-        <button
-          type="button"
-          mat-flat-button
-          color="accent"
-          (click)="uploadFile('video')"
-          *ngIf="isDirectVideo()"
-          [matTooltip]="'Upload video' | trans"
-        >
+        <button type="button" mat-flat-button color="accent" (click)="uploadFile('video')" *ngIf="isDirectVideo()"
+          [matTooltip]="'Upload video' | trans">
           <mat-icon svgIcon="file-upload"></mat-icon>
         </button>
-        <textarea
-          required
-          id="crupdate-video-modal-url"
-          formControlName="url"
-          rows="5"
-          *ngIf="isEmbed()"
-        ></textarea>
-        <input
-          type="text"
-          required
-          id="crupdate-video-modal-url"
-          formControlName="url"
-          *ngIf="!isEmbed()"
-        />
+        <textarea required id="crupdate-video-modal-url" formControlName="url" rows="5" *ngIf="isEmbed()"></textarea>
+        <input type="text" required id="crupdate-video-modal-url" formControlName="url" *ngIf="!isEmbed()" />
+        <ng-container *ngIf="isYtVideoId()">
+          <div class="ng-autocomplete" style="width: 100%">
+            <ng-autocomplete [data]="ytOptions" [customFilter]="customFilter" searchKeyword="name" placeholder="Get Youtube video ID"
+              (inputChanged)='getOptions($event)' (selected)='selectEvent($event)' [itemTemplate]="itemTemplate" [isLoading]="isOptionsLoading">
+            </ng-autocomplete>
+            <ng-template #itemTemplate let-item>
+              <a [innerHTML]="item.name"></a>
+            </ng-template>
+          </div>
+        </ng-container>
       </div>
       <upload-progress-bar></upload-progress-bar>
       <p class="error" *ngIf="errors.url">{{ errors.url }}</p>
@@ -106,12 +88,8 @@
       </div>
     </div>
 
-    <select-title-input
-      [formGroup]="videoForm"
-      [titleError]="errors.title_id"
-      id="crupdate-video-modal-title_id"
-      *ngIf="!data.episode_num"
-    ></select-title-input>
+    <select-title-input [formGroup]="videoForm" [titleError]="errors.title_id" id="crupdate-video-modal-title_id"
+      *ngIf="!data.episode_num"></select-title-input>
 
     <ng-container *ngIf="settings.get('streaming.show_category_select') || insideAdmin()">
       <div class="input-container">
@@ -138,10 +116,8 @@
       <p class="error" *ngIf="errors.order">{{ errors.order }}</p>
     </div>
 
-    <captions-panel
-      [video]="data.video"
-      *ngIf="supportsCaptions() && (settings.get('streaming.show_captions_panel') || insideAdmin())"
-    ></captions-panel>
+    <captions-panel [video]="data.video"
+      *ngIf="supportsCaptions() && (settings.get('streaming.show_captions_panel') || insideAdmin())"></captions-panel>
   </mat-dialog-content>
 
   <mat-dialog-actions>

@@ -62,6 +62,19 @@
                     </div>
                 </div>
 
+                <div class="input-container input-inline">
+                    <label for="subdomain" trans>Subdomain</label>
+                    <input
+                        type="text"
+                        id="subdomain"
+                        name="subdomain"
+                        formControlName="subdomain"
+                    />
+                    <div class="error subdomain-error" *ngIf="userErrors.subdomain">
+                        {{ userErrors.subdomain }}
+                    </div>
+                </div>
+
                 <div class="input-container input-inline avatar-input-container">
                     <label for="last_name" trans>Profile image</label>
                     <div class="avatar-input">

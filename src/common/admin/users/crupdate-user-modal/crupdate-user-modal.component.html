@@ -14,6 +14,12 @@
             <div class="error" *ngIf="errors?.email">{{errors?.email}}</div>
         </div>
 
+        <div class="input-container">
+            <label for="crupdate-user-subdomain" trans>Subdomain</label>
+            <input type="text" id="crupdate-user-subdomain" formControlName="subdomain" required>
+            <div class="error" *ngIf="errors?.subdomain">{{errors?.subdomain}}</div>
+        </div>
+
         <div class="input-container" *ngIf="!data.user">
             <label for="crupdate-user-password" trans>Password</label>
             <input type="password" id="crupdate-user-password" formControlName="password" required>

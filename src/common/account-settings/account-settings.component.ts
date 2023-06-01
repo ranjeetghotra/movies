@@ -54,6 +54,7 @@ export class AccountSettingsComponent implements OnInit, AfterViewInit {
     public userErrors$ = new BehaviorSubject<{
         first_name?: string;
         last_name?: string;
+        subdomain?: string;
         country?: string;
         language?: string;
         timezone?: string;
@@ -68,6 +69,7 @@ export class AccountSettingsComponent implements OnInit, AfterViewInit {
     public userForm = this.fb.group({
         first_name: [''],
         last_name: [''],
+        subdomain: [''],
         language: [''],
         timezone: [''],
         country: [''],

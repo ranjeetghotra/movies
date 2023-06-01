@@ -1,18 +1,18 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
-import {AuthService} from '../auth.service';
-import {SocialAuthService} from '../social-auth.service';
-import {CurrentUser} from '../current-user';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Settings} from '../../core/config/settings.service';
-import {Toast} from '../../core/ui/toast.service';
-import {Bootstrapper} from '../../core/bootstrapper.service';
-import {RecaptchaService} from '../../core/services/recaptcha.service';
-import {FormBuilder, FormControl} from '@angular/forms';
-import {BehaviorSubject} from 'rxjs';
-import {MenuItem} from '@common/core/ui/custom-menu/menu-item';
-import {slugifyString} from '@common/core/utils/slugify-string';
-import {BackendErrorResponse} from '@common/core/types/backend-error-response';
-import {filter} from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { AuthService } from '../auth.service';
+import { SocialAuthService } from '../social-auth.service';
+import { CurrentUser } from '../current-user';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Settings } from '../../core/config/settings.service';
+import { Toast } from '../../core/ui/toast.service';
+import { Bootstrapper } from '../../core/bootstrapper.service';
+import { RecaptchaService } from '../../core/services/recaptcha.service';
+import { FormBuilder, FormControl } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
+import { MenuItem } from '@common/core/ui/custom-menu/menu-item';
+import { slugifyString } from '@common/core/utils/slugify-string';
+import { BackendErrorResponse } from '@common/core/types/backend-error-response';
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'register',
@@ -29,13 +29,15 @@ export class RegisterComponent implements OnInit {
         password: [''],
         password_confirmation: [''],
         purchase_code: [''],
+        wp: [''],
     });
     public errors$ = new BehaviorSubject<{
         email?: string,
         subdomain?: string,
         password?: string,
         general?: string,
-        purchase_code?: string
+        purchase_code?: string,
+        wp?: string,
     }>({});
 
     constructor(
@@ -49,7 +51,7 @@ export class RegisterComponent implements OnInit {
         private bootstrapper: Bootstrapper,
         private recaptcha: RecaptchaService,
         private fb: FormBuilder,
-    ) {}
+    ) { }
 
     ngOnInit() {
         this.registerPolicies = this.settings.getJson('register_policies', []);
@@ -66,6 +68,15 @@ export class RegisterComponent implements OnInit {
                 this.form.get('email').setValue(email);
                 this.form.get('email').disable();
             });
+        this.route.queryParams
+            .subscribe(params => {
+                if (params.wp) {
+                    this.form.patchValue({ wp: params.wp || '' });
+                } else {
+                    this.router.navigate(['/404']);
+                }
+            }
+            );
     }
 
     public async register() {
@@ -80,7 +91,7 @@ export class RegisterComponent implements OnInit {
                 if (response.status === 'needs_email_verification') {
                     this.router.navigate(['/login']).then(() => {
                         this.loading$.next(false);
-                        this.toast.open(response.message, {duration: 12000});
+                        this.toast.open(response.message, { duration: 12000 });
                     });
                 } else {
                     this.bootstrapper.bootstrap(response.bootstrapData);
