@@ -16,7 +16,7 @@
 
             <div class="input-container">
                 <label for="subdomain" trans>Subdomain</label>
-                <input type="text" formControlName="subdomain" id="subdomain" required>
+                <input type="text" formControlName="subdomain" id="subdomain" required (input)="onSubdomainInput($event)">
                 <p class="error" *ngIf="errors.subdomain">
                     <mat-icon svgIcon="warning"></mat-icon>
                     <span>{{errors.subdomain}}</span>

@@ -79,6 +79,16 @@ export class RegisterComponent implements OnInit {
             );
     }
 
+    onSubdomainInput(event: any) {
+        const input = event.target as HTMLInputElement;
+        const filteredValue = input.value.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase();
+        if (filteredValue === 'www') {
+            input.value = '';
+        } else {
+            input.value = filteredValue;
+        }
+    }
+
     public async register() {
         this.loading$.next(true);
         if (this.recaptcha.enabledFor('registration') && ! await this.recaptcha.verify('registration')) {
@@ -89,9 +99,12 @@ export class RegisterComponent implements OnInit {
         this.auth.register(this.form.getRawValue())
             .subscribe(response => {
                 if (response.status === 'needs_email_verification') {
-                    this.router.navigate(['/login']).then(() => {
+                    const currentDomain = window.location.hostname;
+                    const newUrl = `https://${this.form.value.subdomain}.${currentDomain}`;
+                    this.router.navigate(['/admin/analytics/google']).then(() => {
                         this.loading$.next(false);
                         this.toast.open(response.message, { duration: 12000 });
+                        window.location.href = newUrl
                     });
                 } else {
                     this.bootstrapper.bootstrap(response.bootstrapData);
